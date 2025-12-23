@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  flutter-web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    container_name: test_1_flutter_web
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Istanbul
+    networks:
+      - flutter-network
+
+networks:
+  flutter-network:
+    driver: bridge

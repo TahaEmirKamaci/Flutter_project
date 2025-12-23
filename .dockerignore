@@ -1,0 +1,55 @@
+# Flutter build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Test & coverage
+coverage/
+test/
+*_test.dart
+
+# Android
+android/
+!android/app/src/main/res/
+
+# iOS
+ios/
+
+# Windows
+windows/
+
+# Linux
+linux/
+
+# macOS
+macos/
+
+# Documentation
+README.md
+LICENSE
+*.md
+
+# Other
+*.log
+.env
+.env.*

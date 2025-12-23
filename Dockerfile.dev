@@ -1,0 +1,33 @@
+# Flutter Development Container
+FROM debian:bullseye-slim
+
+# Flutter sürümü
+ARG FLUTTER_VERSION=3.24.0
+
+# Gerekli paketleri yükle
+RUN apt-get update && \
+    apt-get install -y curl git wget unzip libgconf-2-4 gdb libstdc++6 \
+    libglu1-mesa fonts-droid-fallback lib32stdc++6 python3 sed && \
+    apt-get clean
+
+# Flutter SDK'yı indir ve kur
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter && \
+    cd /usr/local/flutter && \
+    git checkout stable
+
+# Flutter path'i ayarla
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# Flutter'ı önbelleğe al ve web desteğini etkinleştir
+RUN flutter config --enable-web && \
+    flutter precache --web && \
+    flutter doctor -v
+
+# Çalışma dizini
+WORKDIR /app
+
+# Port expose
+EXPOSE 8080
+
+# Development server başlat
+CMD ["flutter", "run", "-d", "web-server", "--web-hostname", "0.0.0.0", "--web-port", "8080"]

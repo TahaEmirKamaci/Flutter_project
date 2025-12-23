@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  flutter-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    container_name: test_1_flutter_dev
+    volumes:
+      - .:/app
+      - /app/.dart_tool
+      - /app/build
+    environment:
+      - TZ=Europe/Istanbul
+    networks:
+      - flutter-dev-network
+    stdin_open: true
+    tty: true
+
+networks:
+  flutter-dev-network:
+    driver: bridge
