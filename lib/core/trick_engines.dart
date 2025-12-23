@@ -680,6 +680,8 @@ class BridgeEngine extends BaseTrickEngine {
 
   @override
   void playSelected() {
+    if (phase != GameStatePhase.waitingForPlayer) return;
+    
     // In Bridge: if human is declarer (seat 0) and it's dummy's turn, allow playing from dummy
     final isDeclarerPlayingDummy =
         (declarerIndex == 0 && activePlayerIndex == dummyIndex);

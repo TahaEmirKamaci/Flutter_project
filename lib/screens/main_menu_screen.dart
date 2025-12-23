@@ -3,11 +3,13 @@ import '../core/game_core.dart';
 import '../core/trick_engines.dart';
 import 'game_table_screen.dart';
 import 'bridge_settings_screen.dart';
-import '../components/ui/round_button.dart';
-import '../components/ui/popup_panel.dart';
+import 'hoskin_game_screen.dart';
+import 'batak_game_screen.dart';
+import 'pisti_game_screen.dart';
+import 'solitaire_game_screen.dart';
 import '../components/ui/menu_tile.dart';
 import '../components/ui/suit_badge.dart';
-import '../components/ui/sound_manager.dart';
+import '../ai/hoskin_bot_ai.dart';
 
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
@@ -17,10 +19,8 @@ class MainMenuScreen extends StatefulWidget {
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
   final _nameCtrl = TextEditingController();
-  final _sound = CardSoundManager();
   String get _name => _nameCtrl.text.trim().isEmpty ? 'Player' : _nameCtrl.text.trim();
   
-  // Bridge engine instance for settings
   final _bridgeEngine = BridgeEngine();
 
   void _open(GameEngine engine) {
@@ -35,8 +35,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     ));
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -44,7 +42,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient + subtle decorations
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -56,12 +53,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           Positioned(
             right: -60, top: -40,
             child: Container(width: 220, height: 220, decoration: BoxDecoration(
-              shape: BoxShape.circle, color: const Color(0xFF1E3A8A).withOpacity(.25))),
+              shape: BoxShape.circle, color: const Color(0xFF1E3A8A).withValues(alpha: 0.25))),
           ),
           Positioned(
             left: -80, bottom: -60,
             child: Container(width: 260, height: 260, decoration: BoxDecoration(
-              shape: BoxShape.circle, color: const Color(0xFF047857).withOpacity(.22))),
+              shape: BoxShape.circle, color: const Color(0xFF047857).withValues(alpha: 0.22))),
           ),
           SafeArea(
             child: Center(
@@ -72,13 +69,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Header
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                          const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
+                            children: [
                               Text('Kart Oyunları', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
                               SizedBox(height: 4),
                               Text('İsminizi girin ve bir oyun seçin', style: TextStyle(color: Colors.white70)),
@@ -103,7 +99,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // Bot Settings Button
                               Container(
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
@@ -112,7 +107,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF3B82F6).withOpacity(0.3),
+                                      color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -123,10 +118,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(12),
                                     onTap: _showBotSettings,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                    child: const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                                       child: Row(
-                                        children: const [
+                                        children: [
                                           Icon(Icons.smart_toy, color: Colors.white, size: 22),
                                           SizedBox(width: 8),
                                           Text(
@@ -148,7 +143,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      // Tiles grid
                       Expanded(
                         child: Column(
                           children: [
@@ -169,7 +163,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                         subtitle: 'Profesyonel AI ile klasik briç',
                                         colors: const [Color(0xFF1E3A8A), Color(0xFF0B4BB3)],
                                         onTap: ()=> _open(_bridgeEngine),
-                                        trailing: Wrap(spacing: 6, children: const [
+                                        trailing: const Wrap(spacing: 6, children: [
                                           SuitBadge(suit: '♠', size: 22),
                                           SuitBadge(suit: '♥', size: 22),
                                           SuitBadge(suit: '♦', size: 22),
@@ -180,21 +174,73 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                       MenuTile(
                                         emoji: '🂡',
                                         title: 'Hoşkin',
-                                        subtitle: 'Özel oyun (beta)',
+                                        subtitle: '80 kart, barış sayıları, ihale',
                                         colors: const [Color(0xFF047857), Color(0xFF065F46)],
                                         onTap: () {
-                                          // Placeholder: open Bridge for now or show a dialog
-                                          showDialog(context: context, builder: (ctx){
-                                            return AlertDialog(
-                                              backgroundColor: const Color(0xFF0B1226),
-                                              title: const Text('Hoşkin', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                              content: const Text('Hoşkin oyunu yakında eklenecek.', style: TextStyle(color: Colors.white70)),
-                                              actions: [
-                                                TextButton(onPressed: ()=> Navigator.of(ctx).pop(), child: const Text('Kapat')),
-                                              ],
-                                            );
-                                          });
+                                          Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (_) => const HoskinGameScreen(
+                                              difficulty: BotDifficulty.medium,
+                                            ),
+                                          ));
                                         },
+                                        trailing: const Text(
+                                          '♠ ♥ ♦ ♣',
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ),
+                                      MenuTile(
+                                        emoji: '🃏',
+                                        title: 'Batak',
+                                        subtitle: 'İhale yapın, elleri toplayın',
+                                        colors: const [Color(0xFF9333EA), Color(0xFF7E22CE)],
+                                        onTap: () {
+                                          Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (_) => const BatakGameScreen(),
+                                          ));
+                                        },
+                                        trailing: const Icon(
+                                          Icons.collections,
+                                          color: Colors.white70,
+                                          size: 32,
+                                        ),
+                                      ),
+                                      MenuTile(
+                                        emoji: '🎯',
+                                        title: 'Pişti',
+                                        subtitle: 'Eşleyin, pişti yapın!',
+                                        colors: const [Color(0xFFEA580C), Color(0xFFC2410C)],
+                                        onTap: () {
+                                          Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (_) => const PistiGameScreen(),
+                                          ));
+                                        },
+                                        trailing: const Text(
+                                          'J ♠',
+                                          style: TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ),
+                                      MenuTile(
+                                        emoji: '🂠',
+                                        title: 'Solitaire',
+                                        subtitle: 'Klondike - tek kişilik',
+                                        colors: const [Color(0xFF0891B2), Color(0xFF0E7490)],
+                                        onTap: () {
+                                          Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (_) => const SolitaireGameScreen(),
+                                          ));
+                                        },
+                                        trailing: const Icon(
+                                          Icons.person,
+                                          color: Colors.white70,
+                                          size: 32,
+                                        ),
                                       ),
                                     ],
                                   );
@@ -202,7 +248,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            // Replacement text for removed Pişti & Batak buttons
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                               decoration: BoxDecoration(
@@ -211,9 +256,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                                 border: Border.all(color: Colors.white12),
                               ),
                               child: const Text(
-                                'hoşkin',
+                                '5 Farklı Kart Oyunu - Briç, Hoşkin, Batak, Pişti, Solitaire',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 1.1,
                                   color: Colors.white70,

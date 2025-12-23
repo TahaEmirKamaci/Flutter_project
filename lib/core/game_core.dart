@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 /// Supported game types in the multi-game app.
-enum GameType { bridge, batak, pisti, poker, king }
+enum GameType { bridge, batak, pisti, poker, king, solitaire }
 
 /// High-level state machine phases shared by all games.
 enum GameStatePhase {

@@ -976,10 +976,28 @@ class _GameTableScreenState extends State<GameTableScreen>
               },
               onDoubleTap: (i) {
                 widget.engine.selectCard(i);
+                
                 if (widget.engine.selectedIndex != null &&
-                    phase == GameStatePhase.waitingForPlayer &&
-                    widget.engine.activePlayerIndex == 0) {
-                  _playSelected();
+                    phase == GameStatePhase.waitingForPlayer) {
+                  
+                  final isBridge = widget.engine.type == GameType.bridge;
+                  final activePlayer = widget.engine.activePlayerIndex;
+                  
+                  if (isBridge) {
+                    final bridgeEngine = widget.engine as dynamic;
+                    final declarerIdx = bridgeEngine.declarerIndex;
+                    final dummyIdx = bridgeEngine.dummyIndex;
+                    
+                    final isOurTurn = activePlayer == 0;
+                    final isDeclarerPlayingDummy = 
+                        declarerIdx == 0 && dummyIdx != null && activePlayer == dummyIdx;
+                    
+                    if (isOurTurn || isDeclarerPlayingDummy) {
+                      _playSelected();
+                    }
+                  } else if (activePlayer == 0) {
+                    _playSelected();
+                  }
                 }
               },
               fanSpread: _fanSpread,
@@ -1015,13 +1033,38 @@ class _GameTableScreenState extends State<GameTableScreen>
                     )
                   else
                     ElevatedButton(
-                      onPressed:
-                          (!widget.engine.isDealing &&
-                              widget.engine.selectedIndex != null &&
-                              phase == GameStatePhase.waitingForPlayer &&
-                              widget.engine.activePlayerIndex == 0)
-                          ? _playSelected
-                          : null,
+                      onPressed: (() {
+                        if (widget.engine.isDealing) return null;
+                        if (widget.engine.selectedIndex == null) return null;
+                        if (phase != GameStatePhase.waitingForPlayer) return null;
+                        
+                        // Briç için: kendi sıramız VEYA declarer olup dummy oynuyorsak
+                        final isBridge = widget.engine.type == GameType.bridge;
+                        final activePlayer = widget.engine.activePlayerIndex;
+                        
+                        if (isBridge) {
+                          final bridgeEngine = widget.engine as dynamic;
+                          final declarerIdx = bridgeEngine.declarerIndex;
+                          final dummyIdx = bridgeEngine.dummyIndex;
+                          
+                          // Kendi sıramız (activePlayer == 0)
+                          final isOurTurn = activePlayer == 0;
+                          // Declarer olup dummy'yi kontrol ediyorsak
+                          final isDeclarerPlayingDummy = 
+                              declarerIdx == 0 && dummyIdx != null && activePlayer == dummyIdx;
+                          
+                          if (isOurTurn || isDeclarerPlayingDummy) {
+                            return _playSelected;
+                          }
+                          return null;
+                        }
+                        
+                        // Diğer oyunlar için sadece kendi sıramız
+                        if (activePlayer == 0) {
+                          return _playSelected;
+                        }
+                        return null;
+                      })(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E3A8A),
                         foregroundColor: Colors.white,
